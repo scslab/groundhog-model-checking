@@ -20,3 +20,6 @@ autom4te.cache/
 
 #binaries
 test
+.*.sw*
+.sw*
+build
