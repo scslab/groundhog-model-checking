@@ -31,6 +31,10 @@ AC_LANG(C++)
 AX_APPEND_COMPILE_FLAGS([-pthread])
 AS_IF([test -z "${WFLAGS+set}"], AX_APPEND_COMPILE_FLAGS([-Wall], WFLAGS))
 
+
+PKG_PROG_PKG_CONFIG
+PKG_CHECK_MODULES([libsodium], [libsodium])
+
 CXXFLAGS="$CXXFLAGS $WFLAGS"
 
 export CXXFLAGS

@@ -20,6 +20,8 @@ SUBDIRS = $(PKGCONFIG_SUBDIRS)
 
 CLEANFILES = *~ .*~
 
+include $(srcdir)/lib/utility/Makefile.am.fragment
+
 X_FILES = \
 	xdr/storage.x \
 	xdr/types.x
@@ -34,19 +36,25 @@ SUFFIXES = .x .h
 .x.h:
 	$(XDRC)  -hh -o $@ $<
 
+HASH_SET_SRCS = \
+	hash_set/atomic_set.cc 
 
 OBJECT_SRCS = \
 	object/make_delta.cc \
 	object/revertable_object.cc
 
 SRCS = \
-	$(OBJECT_SRCS)
+	$(HASH_SET_SRCS) \
+	$(OBJECT_SRCS) \
+	$(utility_CCS)
 
 AM_CPPFLAGS = \
-	$(xdrpp_CFLAGS)
+	$(xdrpp_CFLAGS) \
+	$(utility_CFLAGS)
 
 LDADD = \
-	$(xdrpp_LIBS) 
+	$(xdrpp_LIBS) \
+	$(utility_LIBS)
 
 $(SRCS:.cc=.o) : $(XH_FILES)
 

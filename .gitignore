@@ -12,6 +12,8 @@ stamp-h1
 compile
 autom4te.cache/
 
+**/*~
+
 **/.dirstamp
 **/.deps/*
 **/*.o
