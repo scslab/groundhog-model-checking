@@ -40,12 +40,18 @@ HASH_SET_SRCS = \
 	hash_set/atomic_set.cc 
 
 OBJECT_SRCS = \
+	object/comparators.cc \
 	object/make_delta.cc \
+	object/object_defaults.cc \
 	object/revertable_object.cc
+
+THREADLOCAL_SRCS = \
+	threadlocal/threadlocal_context.cc
 
 SRCS = \
 	$(HASH_SET_SRCS) \
 	$(OBJECT_SRCS) \
+	$(THREADLOCAL_SRCS) \
 	$(utility_CCS_NOLDMB)
 
 AM_CPPFLAGS = \
