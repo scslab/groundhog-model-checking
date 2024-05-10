@@ -1,7 +1,7 @@
 .PHONY: clean
 
 CFLAGS += -g
-CFLAGS += -DN_WORKERS=8
+CFLAGS += -DN_WORKERS=1
 
 build/examples/simple_race: examples/simple_race.c build/libptimc.a
 	@ mkdir -p build/examples

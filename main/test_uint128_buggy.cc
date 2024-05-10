@@ -33,6 +33,6 @@ void imc_check_main(void) {
     uint64_t lowbits, highbits;
     counter.test_read_total(lowbits, highbits);
 
-    imcassert(lowbits == 5);
-    imcassert(highbits == 1);
+    assert(lowbits == 5);
+    assert(highbits == 1);
 }

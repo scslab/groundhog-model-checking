@@ -15,22 +15,32 @@ void *worker(void *_) {
     return NULL;
 }
 
+void *sub_worker(void *_) {
+    counter.add(UINT64_MAX);
+    counter.sub(UINT64_MAX);
+    return NULL;
+}
+
 void imc_check_main(void) {
     scs::yield_config.UINT128_YIELD = true;
 
-    imcthread_t t1;
-    imcthread_t t2;
+    imcthread_t t1, t2, t3;
     // printf("About to create two threads!\n");
     imcthread_create(&t1, NULL, worker, 0);
     imcthread_create(&t2, NULL, worker, 0);
+    imcthread_create(&t3, NULL, sub_worker, 0);
+
     // printf("Threads created!\n");
 
     imcthread_join(t1, NULL);
     imcthread_join(t2, NULL);
+    imcthread_join(t3, NULL);
 
     uint64_t lowbits, highbits;
     counter.test_read_total(lowbits, highbits);
 
-    imcassert(lowbits == UINT64_MAX - 1);
-    imcassert(highbits == 1);
+    assert(lowbits == UINT64_MAX - 1);
+    assert(highbits == 1);
+
+
 }
