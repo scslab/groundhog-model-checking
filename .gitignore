@@ -17,3 +17,6 @@ autom4te.cache/
 **/.dirstamp
 **/.deps/*
 **/*.o
+
+#binaries
+test

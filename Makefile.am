@@ -36,6 +36,9 @@ SUFFIXES = .x .h
 .x.h:
 	$(XDRC)  -hh -o $@ $<
 
+CRYPTO_SRCS = \
+	crypto/crypto_utils.cc
+
 HASH_SET_SRCS = \
 	hash_set/atomic_set.cc 
 
@@ -49,6 +52,7 @@ THREADLOCAL_SRCS = \
 	threadlocal/threadlocal_context.cc
 
 SRCS = \
+	$(CRYPTO_SRCS) \
 	$(HASH_SET_SRCS) \
 	$(OBJECT_SRCS) \
 	$(THREADLOCAL_SRCS) \
@@ -56,10 +60,12 @@ SRCS = \
 
 AM_CPPFLAGS = \
 	$(xdrpp_CFLAGS) \
+	$(libsodium_CFLAGS) \
 	$(utility_CFLAGS)
 
 LDADD = \
 	$(xdrpp_LIBS) \
+	$(libsodium_LIBS) \
 	$(utility_LIBS)
 
 $(SRCS:.cc=.o) : $(XH_FILES)

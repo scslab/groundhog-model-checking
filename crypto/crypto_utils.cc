@@ -16,8 +16,6 @@
 
 #include "crypto/crypto_utils.h"
 
-#include "pedersen_ffi/pedersen.h"
-
 #include <atomic>
 #include <cstdio>
 #include <sodium.h>
@@ -40,8 +38,6 @@ initialize_crypto()
         HASH_KEY = new uint8_t[crypto_shorthash_KEYBYTES];
         crypto_shorthash_keygen(HASH_KEY);
     }
-
-    init_pedersen();
 
     std::printf("initialized sodium\n");
 }
