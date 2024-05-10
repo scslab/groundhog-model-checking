@@ -2,7 +2,6 @@
 
 #include "libimc.h"
 
-#define N_WORKERS 1
 #define MAX_DEPTH 128
 
 struct partial_path {
