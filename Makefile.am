@@ -46,7 +46,7 @@ OBJECT_SRCS = \
 SRCS = \
 	$(HASH_SET_SRCS) \
 	$(OBJECT_SRCS) \
-	$(utility_CCS)
+	$(utility_CCS_NOLDMB)
 
 AM_CPPFLAGS = \
 	$(xdrpp_CFLAGS) \

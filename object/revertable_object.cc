@@ -21,8 +21,6 @@
 #include "object/object_defaults.h"
 #include "object/comparators.h"
 
-#include "debug/debug_utils.h"
-
 #include "hash_set/utils.h"
 
 #include <utils/assert.h>
