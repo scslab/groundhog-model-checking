@@ -1,5 +1,9 @@
-#include "minimal_stdlib.h"
 #include "_libimc.h"
+#include <stdio.h>
+#include <assert.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stddef.h>
 
 // From worker.c
 extern void worker_spawn(void *data);

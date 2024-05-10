@@ -25,12 +25,31 @@ int imcthread_create(imcthread_t *threadp,
 
     assert(!getcontext(&thread->ctx));
     makecontext(&thread->ctx, imcthread_entry_point, 1, thread->id);
+
+    return 0;
 }
 
 int imcthread_yield(void) {
     // pauses the current thread and returns to the master thread
     assert(CURRENT_THREAD);
     swapcontext(&(CURRENT_THREAD->ctx), &MASTER_CTX);
+}
+
+static void *_imc_check_main(void *_) { imc_check_main(); }
+void check_main() {
+    imcthread_t _thread;
+    imcthread_create(&_thread, NULL, _imc_check_main, NULL);
+
+    while (1) {
+        int n_alive = 0;
+        for (int i = 0; i < N_THREADS; i++)
+            n_alive += (THREADS[i]->state != THREAD_STATE_DEAD);
+        if (!n_alive) break;
+
+        int tid = choose(N_THREADS, 0);
+        if (THREADS[tid]->state == THREAD_STATE_DEAD) continue;
+        switch_to_thread(THREADS[tid]);
+    }
 }
 
 static void switch_to_thread(struct imcthread *thread) {

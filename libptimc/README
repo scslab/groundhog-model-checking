@@ -22,3 +22,11 @@ this is mostly copied over from the libraft stuff.
 
 libptimc is a greenthreads implementation using libimc to determine thread
 ordering.
+
+#### Usage
+
+Write your code inside a function called
+
+    void imc_check_main(void)
+
+Use imcthread_create and imcthread_yield

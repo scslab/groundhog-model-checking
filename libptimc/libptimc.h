@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <ucontext.h>
+#include "libimc.h"
 
 enum thread_state {
     THREAD_STATE_FETUS,
@@ -30,5 +31,6 @@ int imcthread_create(imcthread_t *thread,
 
 int imcthread_yield(void);
 
-// start model checking
-void imcthread_start(void);
+void check_main(void);
+
+extern void imc_check_main(void);
