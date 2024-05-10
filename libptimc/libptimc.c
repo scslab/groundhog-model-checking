@@ -24,6 +24,9 @@ int imcthread_create(imcthread_t *threadp,
     thread->id = N_THREADS - 1;
 
     assert(!getcontext(&thread->ctx));
+    thread->ctx.uc_stack.ss_size = 4 * 1024 * 1024;
+    thread->ctx.uc_stack.ss_sp = malloc(thread->ctx.uc_stack.ss_size);
+    thread->ctx.uc_link = 0;
     makecontext(&thread->ctx, imcthread_entry_point, 1, thread->id);
 
     return 0;
@@ -32,24 +35,64 @@ int imcthread_create(imcthread_t *threadp,
 int imcthread_yield(void) {
     // pauses the current thread and returns to the master thread
     assert(CURRENT_THREAD);
-    swapcontext(&(CURRENT_THREAD->ctx), &MASTER_CTX);
+    struct imcthread *thread = CURRENT_THREAD;
+
+    if (thread->state == THREAD_STATE_DEAD) {
+        for (size_t i = 0; i < N_THREADS; i++)
+            if (THREADS[i]->waiting_on == thread)
+                THREADS[i]->waiting_on = 0;
+    }
+
+    CURRENT_THREAD = 0;
+    swapcontext(&(thread->ctx), &MASTER_CTX);
+
+    return 0;
 }
 
-static void *_imc_check_main(void *_) { imc_check_main(); }
+static void resetter(void) {
+    for (int i = 0; i < N_THREADS; i++)
+        free(THREADS[i]);
+    free(THREADS);
+    THREADS = 0;
+    N_THREADS = 0;
+}
+
+static void *_imc_check_main(void *_) { imc_check_main(); return 0; }
 void check_main() {
+    register_resetter(resetter);
     imcthread_t _thread;
     imcthread_create(&_thread, NULL, _imc_check_main, NULL);
 
     while (1) {
-        int n_alive = 0;
-        for (int i = 0; i < N_THREADS; i++)
-            n_alive += (THREADS[i]->state != THREAD_STATE_DEAD);
-        if (!n_alive) break;
+        int n_alive = 0, n_avail = 0;
+        for (int i = 0; i < N_THREADS; i++) {
+            if (THREADS[i]->state == THREAD_STATE_DEAD) continue;
+            n_alive++;
+            if (THREADS[i]->waiting_on) continue;
+            n_avail++;
+        }
+        // check that we're not in a deadlock
+        if (!n_avail) { imcassert(!n_alive); break; }
 
-        int tid = choose(N_THREADS, 0);
-        if (THREADS[tid]->state == THREAD_STATE_DEAD) continue;
-        switch_to_thread(THREADS[tid]);
+        int count = choose(n_avail, 0);
+        for (int i = 0; i < N_THREADS; i++) {
+            if (THREADS[i]->state == THREAD_STATE_DEAD) continue;
+            if (THREADS[i]->waiting_on) continue;
+            if (count--) continue;
+            switch_to_thread(THREADS[i]);
+            break;
+        }
     }
+}
+
+int imcthread_join(imcthread_t thread, void **retval) {
+    if (thread->state != THREAD_STATE_DEAD) {
+        CURRENT_THREAD->waiting_on = thread;
+        imcthread_yield();
+    }
+
+    if (retval) *retval = thread->retval;
+    return 0;
 }
 
 static void switch_to_thread(struct imcthread *thread) {
@@ -65,8 +108,9 @@ static void imcthread_entry_point(int tid) {
     thread->state = THREAD_STATE_ALIVE;
     CURRENT_THREAD = thread;
 
-    thread->fn(thread->arg);
+    void *result = thread->fn(thread->arg);
 
+    thread->retval = result;
     thread->state = THREAD_STATE_DEAD;
 
     imcthread_yield();

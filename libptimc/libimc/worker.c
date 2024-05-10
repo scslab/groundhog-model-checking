@@ -5,11 +5,14 @@
 #include <stdlib.h>
 #include <stddef.h>
 
+static void (*RESETTER)(void) = 0;
 struct partial_path CURRENT_PATH;
 int CURRENT_N_CHOICES;
 struct message_bundle BUNDLE;
 
 choice_t choose(choice_t n, hash_t hash) {
+    if (n == 1) return 0;
+
     if (CURRENT_N_CHOICES++ < CURRENT_PATH.n_choices)
         return CURRENT_PATH.choices[CURRENT_N_CHOICES - 1];
 
@@ -38,15 +41,19 @@ void check_exit_normal() {
     exit(0);
 }
 
+void register_resetter(void (*resetter)(void)) {
+    RESETTER = resetter;
+}
+
 void worker_spawn(void *data) {
     memset(&BUNDLE, 0, sizeof(BUNDLE));
+    if (RESETTER) RESETTER();
     struct partial_path *partial_path = data;
     CURRENT_PATH = *partial_path;
 
 #if 0
     for (int i = 0; i < CURRENT_PATH.n_choices; i++) {
-        print_num(CURRENT_PATH.choices[i]);
-        printf(" ");
+        printf("%d ", CURRENT_PATH.choices[i]);
     }
     printf("\n");
 #endif

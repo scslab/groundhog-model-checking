@@ -162,7 +162,8 @@ begin:
 #else
             printf("Done; in total killed: "); printf("%d", n_kills); printf("\n");
 #endif
-            while (1) ;
+            exit(0);
+            // while (1) ;
         }
     }
 }

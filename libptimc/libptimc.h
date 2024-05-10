@@ -17,6 +17,8 @@ typedef struct imcthread {
     void *arg;
     enum thread_state state;
     int id;
+    struct imcthread *waiting_on;
+    void *retval;
 
     ucontext_t ctx;
 } *imcthread_t;
@@ -28,8 +30,8 @@ int imcthread_create(imcthread_t *thread,
                      imcthread_attr_t *attr,
                      void *(*start_routine)(void *),
                      void *arg);
-
 int imcthread_yield(void);
+int imcthread_join(imcthread_t thread, void **retval);
 
 void check_main(void);
 

@@ -2,11 +2,7 @@
 
 #include "libimc.h"
 
-#ifndef OX64
-#define N_WORKERS 16
-#else
-#define N_WORKERS 3
-#endif
+#define N_WORKERS 1
 #define MAX_DEPTH 128
 
 struct partial_path {
@@ -28,7 +24,7 @@ struct __attribute__((__packed__)) message {
 struct __attribute__((__packed__)) message_bundle {
     struct  __attribute__((__packed__)) {
         size_t n_messages;
-        uint8_t exit_status;
+        int8_t exit_status;
     } header;
     struct message messages[MAX_DEPTH];
 };
