@@ -1,4 +1,5 @@
 #include "libptimc.h"
+#include <assert.h>
 
 static int COUNTER = 0;
 
@@ -20,5 +21,5 @@ void imc_check_main(void) {
     imcthread_join(t1, NULL);
     imcthread_join(t2, NULL);
 
-    imcassert(COUNTER == 2);
+    assert(COUNTER == 2);
 }

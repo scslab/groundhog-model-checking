@@ -72,7 +72,7 @@ void check_main() {
             n_avail++;
         }
         // check that we're not in a deadlock
-        if (!n_avail) { imcassert(!n_alive); break; }
+        if (!n_avail) { assert(!n_alive); break; }
 
         int count = choose(n_avail, 0);
         for (int i = 0; i < N_THREADS; i++) {

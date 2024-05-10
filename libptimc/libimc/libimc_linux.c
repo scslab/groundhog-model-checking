@@ -1,4 +1,5 @@
 #include "_libimc.h"
+#include <signal.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdlib.h>
@@ -61,9 +62,16 @@ void send_worker_bundle(struct message_bundle *bundle) {
     exit(bundle->header.exit_status);
 }
 
+static void sighandler(int which) {
+    printf("Got signal: %d\n", which);
+    report_error();
+}
+
 int spawn_worker(void *data, size_t n_data, int worker_idx) {
     int pid = fork();
     if (!pid) {
+        signal(SIGABRT, sighandler);
+        signal(SIGSEGV, sighandler);
         WRITE_PIPE = WORKER_WRITE_PIPES[worker_idx];
         worker_spawn(data);
         exit(0);

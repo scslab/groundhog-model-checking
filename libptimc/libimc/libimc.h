@@ -15,5 +15,3 @@ void report_error();
 void check_exit_normal();
 void register_resetter(void (*resetter)(void));
 extern void check_main();
-
-static void imcassert(int x) { if (!x) report_error(); }
