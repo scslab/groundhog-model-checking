@@ -58,15 +58,20 @@ SRCS = \
 	$(THREADLOCAL_SRCS) \
 	$(utility_CCS_NOLDMB)
 
+libptimc/build/libptimc.so: libptimc/libptimc.c libptimc/libimc/libimc_linux.c libptimc/libimc/master.c libptimc/libimc/worker.c
+	cd libptimc && make
+
 AM_CPPFLAGS = \
 	$(xdrpp_CFLAGS) \
 	$(libsodium_CFLAGS) \
-	$(utility_CFLAGS)
+	$(utility_CFLAGS) \
+	-I./libptimc/libimc/
 
 LDADD = \
 	$(xdrpp_LIBS) \
 	$(libsodium_LIBS) \
-	$(utility_LIBS)
+	$(utility_LIBS) \
+	libptimc/build/libptimc.so
 
 $(SRCS:.cc=.o) : $(XH_FILES)
 
@@ -74,4 +79,7 @@ bin_PROGRAMS = \
 	test
 
 test_SOURCES = main/test.cc $(SRCS)
+
+clean-local:
+	$(RM) -r libptimc/build/
 
