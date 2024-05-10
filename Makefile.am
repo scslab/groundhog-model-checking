@@ -58,7 +58,7 @@ SRCS = \
 	$(THREADLOCAL_SRCS) \
 	$(utility_CCS_NOLDMB)
 
-libptimc/build/libptimc.so: libptimc/libptimc.c libptimc/libimc/libimc_linux.c libptimc/libimc/master.c libptimc/libimc/worker.c
+libptimc/build/libptimc.a: libptimc/libptimc.c libptimc/libimc/libimc_linux.c libptimc/libimc/master.c libptimc/libimc/worker.c
 	cd libptimc && make
 
 AM_CPPFLAGS = \
@@ -71,14 +71,16 @@ LDADD = \
 	$(xdrpp_LIBS) \
 	$(libsodium_LIBS) \
 	$(utility_LIBS) \
-	libptimc/build/libptimc.so
+	./libptimc/build/libptimc.a
 
 $(SRCS:.cc=.o) : $(XH_FILES)
 
 bin_PROGRAMS = \
-	test
+	test_uint128_simple \
+	test_uint128_buggy
 
-test_SOURCES = main/test.cc $(SRCS)
+test_uint128_simple_SOURCES = main/test_uint128_simple.cc $(SRCS)
+test_uint128_buggy_SOURCES = main/test_uint128_buggy.cc $(SRCS)
 
 clean-local:
 	$(RM) -r libptimc/build/

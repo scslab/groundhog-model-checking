@@ -54,6 +54,20 @@ public:
 		}
 	}
 
+	void buggy_add(uint64_t v)
+	{
+		conditional_yield();
+		uint64_t prev_lowbits = lowbits.load(std::memory_order_relaxed);//.fetch_add(v, std::memory_order_relaxed);
+		conditional_yield();
+		lowbits.fetch_add(v, std::memory_order_relaxed);
+
+		if (__builtin_add_overflow_p(prev_lowbits, v, static_cast<uint64_t>(0)))
+		{
+			conditional_yield();
+			highbits.fetch_add(1, std::memory_order_relaxed);
+		}
+	}
+
 	void sub(uint64_t v)
 	{
 		conditional_yield();
@@ -85,6 +99,13 @@ public:
 		conditional_yield();
 		highbits.store(0, std::memory_order_relaxed);
 		lowbits.store(0, std::memory_order_relaxed);
+	}
+
+	// test harness
+	void test_read_total(uint64_t& o_lowbits, uint64_t& o_highbits)
+	{
+		o_lowbits = lowbits;
+		o_highbits = highbits;
 	}
 };
 
