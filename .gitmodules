@@ -1,0 +1,6 @@
+[submodule "lib/xdrpp"]
+	path = lib/xdrpp
+	url = https://github.com/gramseyer/xdrpp.git
+[submodule "m4"]
+	path = m4
+	url = https://github.com/gramseyer/m4.git
