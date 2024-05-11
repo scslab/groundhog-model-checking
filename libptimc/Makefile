@@ -3,7 +3,9 @@
 CFLAGS += -g
 CFLAGS += -DN_WORKERS=1
 
-build/examples/simple_race: examples/simple_race.c build/libptimc.a
+all: build/examples/simple_race build/examples/global_state
+
+build/examples/%: examples/%.c build/libptimc.a
 	@ mkdir -p build/examples
 	$(CC) -I./ -Ilibimc/ $(CFLAGS) -o $@ $^ -fPIC
 

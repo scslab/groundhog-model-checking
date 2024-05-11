@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <stddef.h>
 
-static void (*RESETTER)(void) = 0;
 struct partial_path CURRENT_PATH;
 int CURRENT_N_CHOICES;
 struct message_bundle BUNDLE;
@@ -41,13 +40,8 @@ void check_exit_normal() {
     exit(0);
 }
 
-void register_resetter(void (*resetter)(void)) {
-    RESETTER = resetter;
-}
-
 void worker_spawn(void *data) {
     memset(&BUNDLE, 0, sizeof(BUNDLE));
-    if (RESETTER) RESETTER();
     struct partial_path *partial_path = data;
     CURRENT_PATH = *partial_path;
 

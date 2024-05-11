@@ -49,17 +49,8 @@ int imcthread_yield(void) {
     return 0;
 }
 
-static void resetter(void) {
-    for (int i = 0; i < N_THREADS; i++)
-        free(THREADS[i]);
-    free(THREADS);
-    THREADS = 0;
-    N_THREADS = 0;
-}
-
 static void *_imc_check_main(void *_) { imc_check_main(); return 0; }
 void check_main() {
-    register_resetter(resetter);
     imcthread_t _thread;
     imcthread_create(&_thread, NULL, _imc_check_main, NULL);
 
