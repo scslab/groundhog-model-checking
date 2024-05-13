@@ -70,8 +70,14 @@ static void sighandler(int which) {
 int spawn_worker(void *data, size_t n_data, int worker_idx) {
     int pid = fork();
     if (!pid) {
-        signal(SIGABRT, sighandler);
-        signal(SIGSEGV, sighandler);
+        struct sigaction action;
+        action.sa_handler = sighandler;
+        sigemptyset(&(action.sa_mask));
+        action.sa_flags = 0;
+
+        assert(!sigaction(SIGABRT, &action, 0));
+        assert(!sigaction(SIGSEGV, &action, 0));
+
         WRITE_PIPE = WORKER_WRITE_PIPES[worker_idx];
         worker_spawn(data);
         exit(0);

@@ -4,13 +4,19 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stddef.h>
+#include <unistd.h>
 
 struct partial_path CURRENT_PATH;
 int CURRENT_N_CHOICES;
 struct message_bundle BUNDLE;
 
-choice_t choose(choice_t n, hash_t hash) {
+static hash_t (*HASHER)(void);
+void register_hasher(hash_t (*hasher)(void)) { HASHER = hasher; }
+
+choice_t choose(choice_t n) {
     if (n == 1) return 0;
+
+    hash_t hash = HASHER ? HASHER() : 0;
 
     if (CURRENT_N_CHOICES++ < CURRENT_PATH.n_choices)
         return CURRENT_PATH.choices[CURRENT_N_CHOICES - 1];
@@ -27,10 +33,11 @@ choice_t choose(choice_t n, hash_t hash) {
 }
 
 void report_error() {
-    printf("ERROR found!\n");
     BUNDLE.header.exit_status = 1;
     send_worker_bundle(&BUNDLE);
-    exit(1);
+    printf("ERROR found!\n");
+    // might be in a signal handler
+    _exit(1);
 }
 
 void check_exit_normal() {

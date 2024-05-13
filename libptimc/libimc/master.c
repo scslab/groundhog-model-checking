@@ -98,11 +98,6 @@ begin:
 
                 WORKER_LIVE[i] = 0;
                 n_kills++;
-#ifdef OX64
-                if ((n_kills % 50) == 0) {
-                    printf("N kills: "); print_num(n_kills); printf("\n");
-                }
-#endif
 
                 for (int j = 0; j < bundle.header.n_messages; j++) {
                     struct message message = bundle.messages[j];
@@ -127,12 +122,7 @@ begin:
 
                 printf("Found an error with path: ");
                 for (int j = 0; j < WORKER_PATH[i].n_choices; j++) {
-#ifdef OX64
-                    print_num(WORKER_PATH[i].choices[j]);
-#else
-                    printf("%d", WORKER_PATH[i].choices[j]);
-#endif
-                    printf(" ");
+                    printf("%d ", WORKER_PATH[i].choices[j]);
                 }
                 printf("\n");
                 exit(1);
@@ -157,11 +147,7 @@ begin:
         }
 
         if (!keep_going) {
-#ifdef OX64
-            printf("Done; in total killed: "); print_num(n_kills); printf("\n");
-#else
             printf("Done; in total killed: "); printf("%d", n_kills); printf("\n");
-#endif
             exit(0);
             // while (1) ;
         }
