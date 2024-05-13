@@ -47,3 +47,5 @@ extern void worker_spawn(void *data);
 int spawn_worker(void *data, size_t n_data, int worker_idx);
 
 extern void launch_master();
+
+uint64_t get_time(void);

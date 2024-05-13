@@ -84,6 +84,9 @@ void launch_master() {
 
 begin:
     int n_stack = 0, n_kills = 0;
+    int interval_mask = 1;
+    uint64_t last_time = 0;
+
     for (int i = 0; ; i++) {
         // Visit all the workers. For each, check:
         // - If it has a buffered choice, update the choice stack.
@@ -116,6 +119,12 @@ begin:
                     work_stack = partial_path;
                     n_stack++;
                     WORKER_PATH[i] = *partial_path;
+                }
+
+                if ((get_time() - last_time) > 1) {
+                    printf("Number of branches explored: %10d\n",
+                           n_kills);
+                    last_time = get_time();
                 }
 
                 if (!bundle.header.exit_status) continue;

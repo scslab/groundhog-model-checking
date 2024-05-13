@@ -4,6 +4,7 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <sys/wait.h>
+#include <time.h>
 
 extern void launch_replay(choice_t *path);
 int main(int argc, char **argv) {
@@ -84,4 +85,8 @@ int spawn_worker(void *data, size_t n_data, int worker_idx) {
     }
     WORKER_TO_PID[worker_idx] = pid;
     return 1;
+}
+
+uint64_t get_time() {
+    return time(0);
 }
