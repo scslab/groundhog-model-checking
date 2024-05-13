@@ -31,6 +31,8 @@
 
 namespace scs {
 
+extern bool hashset_bug; // activate bug fixed in commit 4391ae580fcb8e726fadd7dc4c4cb2deedec9746
+
 class AtomicSet : public utils::NonMovableOrCopyable
 {
     constexpr static float extra_buffer = 1.2;

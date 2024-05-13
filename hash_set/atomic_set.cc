@@ -24,6 +24,8 @@ using xdr::operator==;
 
 namespace scs {
 
+bool hashset_bug = false;
+
 AtomicSet::~AtomicSet()
 {
     if (array != nullptr) {
@@ -81,8 +83,7 @@ AtomicSet::try_insert(const HashSetEntry& h, uint32_t start_idx)
             conditional_yield();
             uint32_t local = array[idx].load(std::memory_order_relaxed);
 
-            // insert can be allowed to overwrite tombstones
-            if (local == 0) {
+            if (local == 0 || (hashset_bug && local==TOMBSTONE)) {
                 conditional_yield();
                 if (array[idx].compare_exchange_strong(
                         local, alloc, std::memory_order_relaxed)) {
