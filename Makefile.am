@@ -85,7 +85,9 @@ bin_PROGRAMS = \
 	test_hs_simple \
 	test_hs_ins_erase \
 	test_hs_tombstone_bug \
-	test_hs_tombstone_bug_shorter
+	test_hs_tombstone_bug_shorter \
+	test_rbo_basic_empty \
+	test_rbo_basic_empty_sametc
 
 test_uint128_simple_SOURCES = main/test_uint128_simple.cc $(SRCS)
 test_uint128_buggy_SOURCES = main/test_uint128_buggy.cc $(SRCS)
@@ -93,6 +95,9 @@ test_hs_simple_SOURCES = main/test_hs_simple.cc $(SRCS)
 test_hs_ins_erase_SOURCES = main/test_hs_ins_erase.cc $(SRCS)
 test_hs_tombstone_bug_SOURCES = main/test_hs_tombstone_bug.cc $(SRCS)
 test_hs_tombstone_bug_shorter_SOURCES = main/test_hs_tombstone_bug_shorter.cc $(SRCS)
+test_rbo_basic_empty_SOURCES = main/test_rbo_basic_empty.cc $(SRCS)
+test_rbo_basic_empty_sametc_SOURCES = main/test_rbo_basic_empty_sametc.cc $(SRCS)
+
 
 clean-local:
 	$(RM) -r libptimc/build/
