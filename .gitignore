@@ -24,3 +24,4 @@ test
 .sw*
 build
 test_*
+!main/test_*.cc

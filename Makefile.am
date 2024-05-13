@@ -82,11 +82,13 @@ $(SRCS:.cc=.o) : $(XH_FILES)
 bin_PROGRAMS = \
 	test_uint128_simple \
 	test_uint128_buggy \
-	test_hs_simple
+	test_hs_simple \
+	test_hs_ins_erase
 
 test_uint128_simple_SOURCES = main/test_uint128_simple.cc $(SRCS)
 test_uint128_buggy_SOURCES = main/test_uint128_buggy.cc $(SRCS)
 test_hs_simple_SOURCES = main/test_hs_simple.cc $(SRCS)
+test_hs_ins_erase_SOURCES = main/test_hs_ins_erase.cc $(SRCS)
 
 clean-local:
 	$(RM) -r libptimc/build/
