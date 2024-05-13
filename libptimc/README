@@ -30,3 +30,6 @@ Write your code inside a function called
     void imc_check_main(void)
 
 Use imcthread_create and imcthread_yield
+
+#### Random Notes
+- imcthread_create does *not* act as a yield
