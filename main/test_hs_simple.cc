@@ -24,7 +24,7 @@ void *insert_worker(void *ptr) {
 
 void *insert_other(void* ptr) {
     uint64_t val = (uint64_t) ptr;
-   // assert(set.try_insert(make_hs_entry(val)));
+    assert(set.try_insert(make_hs_entry(val)));
   //  assert(set.try_insert(make_hs_entry(val + 1)));
   //  assert(set.try_insert(make_hs_entry(val + 2)));
     return NULL;

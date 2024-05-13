@@ -22,7 +22,7 @@ AC_CONFIG_MACRO_DIR([m4])
 OPT_FLAGS="-march=native -O3 -flto=auto"
 DEBUG_FLAGS="-ggdb -O0 -march=native"
 
-CXXFLAGS="-std=gnu++2b $DEBUG_FLAGS $CXXFLAGS"
+CXXFLAGS="-std=gnu++2b $OPT_FLAGS $CXXFLAGS"
 CXX="g++"
 
 AC_PROG_CXX
