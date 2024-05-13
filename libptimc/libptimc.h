@@ -37,6 +37,9 @@ int imcthread_create(imcthread_t *thread,
 int imcthread_yield(void);
 int imcthread_join(imcthread_t thread, void **retval);
 
+int imcthread_yieldh(hash_t hash);
+int imcthread_joinh(imcthread_t thread, void **retval, hash_t hash);
+
 void check_main(void);
 
 extern void imc_check_main(void);

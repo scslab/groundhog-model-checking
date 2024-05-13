@@ -10,13 +10,8 @@ struct partial_path CURRENT_PATH;
 int CURRENT_N_CHOICES;
 struct message_bundle BUNDLE;
 
-static hash_t (*HASHER)(void);
-void register_hasher(hash_t (*hasher)(void)) { HASHER = hasher; }
-
-choice_t choose(choice_t n) {
+choice_t choose(choice_t n, hash_t hash) {
     if (n == 1) return 0;
-
-    hash_t hash = HASHER ? HASHER() : 0;
 
     if (CURRENT_N_CHOICES++ < CURRENT_PATH.n_choices)
         return CURRENT_PATH.choices[CURRENT_N_CHOICES - 1];
