@@ -3,7 +3,10 @@
 CFLAGS += -g
 CFLAGS += -DN_WORKERS=8
 
-all: build/examples/simple_race build/examples/global_state build/examples/5threads
+EXAMPLES_SRC := $(wildcard examples/*.c)
+EXAMPLES_EXE = $(addprefix build/,$(EXAMPLES_SRC:.c=))
+
+all: $(EXAMPLES_EXE)
 
 build/examples/%: examples/%.c build/libptimc.a
 	@ mkdir -p build/examples

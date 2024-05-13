@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stddef.h>
+#include <unistd.h>
 
 struct partial_path CURRENT_PATH;
 int CURRENT_N_CHOICES;
@@ -27,10 +28,11 @@ choice_t choose(choice_t n, hash_t hash) {
 }
 
 void report_error() {
-    printf("ERROR found!\n");
     BUNDLE.header.exit_status = 1;
     send_worker_bundle(&BUNDLE);
-    exit(1);
+    printf("ERROR found!\n");
+    // might be in a signal handler
+    _exit(1);
 }
 
 void check_exit_normal() {

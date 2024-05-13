@@ -32,7 +32,7 @@ int imcthread_create(imcthread_t *threadp,
     return 0;
 }
 
-int imcthread_yield(void) {
+int imcthread_yieldh(hash_t hash) {
     // pauses the current thread and returns to the master thread
     assert(CURRENT_THREAD);
     struct imcthread *thread = CURRENT_THREAD;
@@ -48,6 +48,7 @@ int imcthread_yield(void) {
 
     return 0;
 }
+int imcthread_yield(void) { imcthread_yieldh(0); }
 
 static void *_imc_check_main(void *_) { imc_check_main(); return 0; }
 void check_main() {
@@ -76,7 +77,7 @@ void check_main() {
     }
 }
 
-int imcthread_join(imcthread_t thread, void **retval) {
+int imcthread_joinh(imcthread_t thread, void **retval, hash_t hash) {
     if (thread->state != THREAD_STATE_DEAD) {
         CURRENT_THREAD->waiting_on = thread;
         imcthread_yield();
@@ -84,6 +85,9 @@ int imcthread_join(imcthread_t thread, void **retval) {
 
     if (retval) *retval = thread->retval;
     return 0;
+}
+int imcthread_join(imcthread_t thread, void **retval) {
+    return imcthread_joinh(thread, retval, 0);
 }
 
 static void switch_to_thread(struct imcthread *thread) {
