@@ -68,7 +68,7 @@ AtomicSet::try_insert(const HashSetEntry& h, uint32_t start_idx)
 
     uint32_t alloc = ThreadlocalContextStore::allocate_hash(HashSetEntry(h));
 
-    conditional_yield();
+    // not an interesting place to yield
     const uint32_t cur_filled_slots
         = num_filled_slots.load(std::memory_order_relaxed);
 
