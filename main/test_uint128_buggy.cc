@@ -1,7 +1,5 @@
 
-extern "C" {
 #include "libptimc/libptimc.h"
-}
 
 #include <cstdint>
 

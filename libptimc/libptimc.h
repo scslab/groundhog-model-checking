@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdio.h>
 #include <assert.h>
 #include <stdlib.h>
@@ -36,3 +40,7 @@ int imcthread_join(imcthread_t thread, void **retval);
 void check_main(void);
 
 extern void imc_check_main(void);
+
+#ifdef __cplusplus
+}
+#endif

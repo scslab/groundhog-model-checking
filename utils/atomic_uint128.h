@@ -19,9 +19,8 @@
 #include <atomic>
 #include <cstdint>
 
-extern "C" {
-	#include "libptimc/libptimc.h"
-}
+#include "libptimc/libptimc.h"
+
 #include "config/yield_config.h"
 
 namespace scs
