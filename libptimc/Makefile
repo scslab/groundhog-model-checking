@@ -3,7 +3,7 @@
 CFLAGS += -g
 CFLAGS += -DN_WORKERS=8
 
-all: build/examples/simple_race build/examples/global_state
+all: build/examples/simple_race build/examples/global_state build/examples/5threads
 
 build/examples/%: examples/%.c build/libptimc.a
 	@ mkdir -p build/examples
