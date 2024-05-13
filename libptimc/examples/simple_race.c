@@ -3,8 +3,6 @@
 
 static int COUNTER = 0;
 
-hash_t state_hasher() { return (hash_t)COUNTER; }
-
 void *worker(void *_) {
     int local_counter = COUNTER;
     local_counter++;
@@ -13,8 +11,6 @@ void *worker(void *_) {
 }
 
 void imc_check_main(void) {
-    register_hasher(state_hasher);
-
     imcthread_t t1;
     imcthread_t t2;
     // printf("About to create two threads!\n");
