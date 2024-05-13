@@ -25,6 +25,10 @@
 
 #include <utils/non_movable.h>
 
+#include "libptimc/libptimc.h"
+
+#include "config/yield_config.h"
+
 namespace scs {
 
 class AtomicSet : public utils::NonMovableOrCopyable
@@ -38,6 +42,13 @@ class AtomicSet : public utils::NonMovableOrCopyable
     std::atomic<uint32_t> num_filled_slots = 0;
 
     constexpr static uint32_t TOMBSTONE = 0xFFFF'FFFF;
+
+    void
+    conditional_yield() const {
+        if (yield_config.HS_YIELD) {
+            imcthread_yield();
+        }
+    }
 
   public:
     AtomicSet(uint32_t max_capacity)
@@ -56,10 +67,11 @@ class AtomicSet : public utils::NonMovableOrCopyable
 
     void clear();
 
-    bool try_insert(const HashSetEntry& h);
+    // fake start_idx for test simplicity
+    bool try_insert(const HashSetEntry& h, uint32_t start_idx = UINT32_MAX);
 
     // throws if nexist
-    void erase(const HashSetEntry& h);
+    void erase(const HashSetEntry& h, uint32_t start_idx = UINT32_MAX);
 
     std::vector<HashSetEntry> get_hashes() const;
 };

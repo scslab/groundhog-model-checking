@@ -36,6 +36,9 @@ SUFFIXES = .x .h
 .x.h:
 	$(XDRC)  -hh -o $@ $<
 
+CONFIG_SRCS = \
+	config/yield_config.cc
+
 CRYPTO_SRCS = \
 	crypto/crypto_utils.cc
 
@@ -52,6 +55,7 @@ THREADLOCAL_SRCS = \
 	threadlocal/threadlocal_context.cc
 
 SRCS = \
+	$(CONFIG_SRCS) \
 	$(CRYPTO_SRCS) \
 	$(HASH_SET_SRCS) \
 	$(OBJECT_SRCS) \
@@ -77,10 +81,12 @@ $(SRCS:.cc=.o) : $(XH_FILES)
 
 bin_PROGRAMS = \
 	test_uint128_simple \
-	test_uint128_buggy
+	test_uint128_buggy \
+	test_hs_simple
 
 test_uint128_simple_SOURCES = main/test_uint128_simple.cc $(SRCS)
 test_uint128_buggy_SOURCES = main/test_uint128_buggy.cc $(SRCS)
+test_hs_simple_SOURCES = main/test_hs_simple.cc $(SRCS)
 
 clean-local:
 	$(RM) -r libptimc/build/

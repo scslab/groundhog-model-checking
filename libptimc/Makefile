@@ -1,7 +1,7 @@
 .PHONY: clean
 
 CFLAGS += -g
-CFLAGS += -DN_WORKERS=1
+CFLAGS += -DN_WORKERS=8
 
 all: build/examples/simple_race build/examples/global_state
 

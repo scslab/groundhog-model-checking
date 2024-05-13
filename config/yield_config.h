@@ -6,9 +6,10 @@ namespace scs
 
 struct YieldConfig {
 	bool UINT128_YIELD = false;
+	bool HS_YIELD = false;
 };
 
-static YieldConfig yield_config;
+extern YieldConfig yield_config;
 
 }
 

@@ -58,14 +58,17 @@ AtomicSet::clear()
 }
 
 bool
-AtomicSet::try_insert(const HashSetEntry& h)
+AtomicSet::try_insert(const HashSetEntry& h, uint32_t start_idx)
 {
-    const uint32_t start_idx
-        = shorthash(h.hash.data(), h.hash.size(), capacity);
+    if (start_idx == UINT32_MAX) {
+        start_idx
+            = shorthash(h.hash.data(), h.hash.size(), capacity);
+    }
     uint32_t idx = start_idx;
 
     uint32_t alloc = ThreadlocalContextStore::allocate_hash(HashSetEntry(h));
 
+    conditional_yield();
     const uint32_t cur_filled_slots
         = num_filled_slots.load(std::memory_order_relaxed);
 
@@ -75,12 +78,15 @@ AtomicSet::try_insert(const HashSetEntry& h)
 
     do {
         while (true) {
+            conditional_yield();
             uint32_t local = array[idx].load(std::memory_order_relaxed);
 
             // insert can be allowed to overwrite tombstones
             if (local == 0) {
+                conditional_yield();
                 if (array[idx].compare_exchange_strong(
                         local, alloc, std::memory_order_relaxed)) {
+                    conditional_yield();
 
                     num_filled_slots.fetch_add(1, std::memory_order_relaxed);
 
@@ -111,21 +117,25 @@ AtomicSet::try_insert(const HashSetEntry& h)
 }
 
 void
-AtomicSet::erase(const HashSetEntry& h)
+AtomicSet::erase(const HashSetEntry& h, uint32_t start_idx)
 {
-    const uint32_t start_idx
-        = shorthash(h.hash.data(), h.hash.size(), capacity);
+    if (start_idx == UINT32_MAX) {
+        start_idx
+            = shorthash(h.hash.data(), h.hash.size(), capacity);
+    }
     uint32_t idx = start_idx;
 
     do {
         while (true) {
+            conditional_yield();
             uint32_t local = array[idx].load(std::memory_order_relaxed);
 
             if (local != 0 && local != TOMBSTONE) {
                 if (ThreadlocalContextStore::get_hash(local) == h) {
-
+                    conditional_yield();
                     if (array[idx].compare_exchange_strong(
                             local, TOMBSTONE, std::memory_order_relaxed)) {
+                        conditional_yield();
                         num_filled_slots.fetch_sub(1, std::memory_order_relaxed);
                         return;
                     } else {
