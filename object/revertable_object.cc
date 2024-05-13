@@ -28,6 +28,9 @@
 
 using xdr::operator==;
 
+#include "libptimc/libptimc.h"
+#include "config/yield_config.h"
+
 namespace scs {
 
 /**
@@ -129,6 +132,26 @@ RevertableBaseObject::Rewind::~Rewind()
     do_revert = false;
 }
 
+void conditional_rbo_yield() {
+    if (yield_config.RBO_YIELD)
+    {
+        imcthread_yield();
+    }
+}
+void conditional_rbo_atomicu128_yield()
+{
+    if (yield_config.RBO_U128_YIELD)
+    {
+        imcthread_yield();
+    }
+}
+
+void conditional_ro_yield() {
+    if (yield_config.RO_YIELD) {
+        imcthread_yield();
+    }
+}
+
 void
 RevertableBaseObject::clear_required_type()
 {
@@ -146,7 +169,9 @@ RevertableBaseObject::try_set(StorageDeltaClass const& new_obj)
 
     uint64_t new_id = ThreadlocalContextStore::get_uid();
     while (true) {
+        conditional_rbo_yield();
         const uint64_t t = tag.load(std::memory_order_acquire);
+        conditional_rbo_atomicu128_yield();
         StorageDeltaClass* current = obj.load(std::memory_order_acquire);
         uint64_t expect = t;
 
@@ -165,8 +190,10 @@ RevertableBaseObject::try_set(StorageDeltaClass const& new_obj)
             uint64_t new_tag = swap_id(t, new_id);
             new_tag = add_inflight(new_tag);
 
+            conditional_rbo_yield();
             if (tag.compare_exchange_weak(
                     expect, new_tag, std::memory_order_release)) {
+                conditional_rbo_atomicu128_yield();
                 obj.store(new_candidate, std::memory_order_release);
                 return { Rewind(*this, true) };
             }
@@ -190,6 +217,7 @@ RevertableBaseObject::try_set(StorageDeltaClass const& new_obj)
         uint64_t new_tag = swap_id(t, new_id);
         new_tag = add_inflight(new_tag);
 
+        conditional_rbo_yield();
         if (tag.compare_exchange_weak(
                 expect, new_tag, std::memory_order_release)) {
             return { Rewind(*this, true) };
@@ -200,6 +228,7 @@ RevertableBaseObject::try_set(StorageDeltaClass const& new_obj)
 void
 RevertableBaseObject::commit()
 {
+    conditional_rbo_yield();
     tag.fetch_or(1, std::memory_order_acq_rel);
 }
 
@@ -208,7 +237,9 @@ RevertableBaseObject::revert()
 {
     uint64_t new_id = ThreadlocalContextStore::get_uid();
     while (true) {
+        conditional_rbo_yield();
         const uint64_t t = tag.load(std::memory_order_acquire);
+        conditional_rbo_atomicu128_yield();
         auto* current = obj.load(std::memory_order_acquire);
         uint64_t expect = t;
 
@@ -227,10 +258,11 @@ RevertableBaseObject::revert()
         uint64_t new_tag = swap_id(t, new_id);
         new_tag = remove_inflight(new_tag);
 
+        conditional_rbo_yield();
         if (tag.compare_exchange_weak(
                 expect, new_tag, std::memory_order_release)) {
-
             if (!has_inflight(new_tag)) {
+                conditional_rbo_atomicu128_yield();
                 obj.store(nullptr, std::memory_order_release);
                 ThreadlocalContextStore::defer_delete(current);
             }
@@ -262,6 +294,7 @@ RevertableBaseObject::~RevertableBaseObject()
 
 bool try_add_uint64(int64_t delta, std::atomic<uint64_t>& base)
 {
+    conditional_ro_yield();
     uint64_t expect = base.load(std::memory_order_relaxed);
     while(true)
     {
@@ -270,6 +303,7 @@ bool try_add_uint64(int64_t delta, std::atomic<uint64_t>& base)
         {
             return false;
         }
+        conditional_ro_yield();
         if (base.compare_exchange_weak(expect, desire, std::memory_order_relaxed))
         {
             return true;
@@ -301,6 +335,7 @@ RevertableObject::try_add_delta(const StorageDelta& delta)
             int64_t d = delta.set_add_nonnegative_int64().delta;
             if (d < 0) {
                 while (true) {
+                    conditional_ro_yield();
                     int64_t cur_value
                         = total_subtracted.load(std::memory_order_relaxed);
                     if (__builtin_add_overflow_p(
@@ -315,6 +350,7 @@ RevertableObject::try_add_delta(const StorageDelta& delta)
                         return std::nullopt;
                     }
 
+                    conditional_ro_yield();
                     if (total_subtracted.compare_exchange_weak(
                             cur_value, new_value, std::memory_order_relaxed)) {
                         return DeltaRewind(std::move(*res), delta, this);
@@ -349,6 +385,7 @@ RevertableObject::try_add_delta(const StorageDelta& delta)
                 return std::nullopt;
             }
 
+            conditional_ro_yield();
             size_increase.fetch_add(delta.limit_increase(),
                                     std::memory_order_relaxed);
 
@@ -379,15 +416,18 @@ RevertableObject::try_add_delta(const StorageDelta& delta)
                 }
             }
 
+            conditional_ro_yield();
             cur_size
                 += num_new_elts.fetch_add(1, std::memory_order_relaxed) + 1;
 
             if (cur_size > max_size) {
+                conditional_ro_yield();
                 num_new_elts.fetch_sub(1, std::memory_order_relaxed);
                 return std::nullopt;
             }
 
             if (!new_hashes.try_insert(delta.hash())) {
+                conditional_ro_yield();
                 num_new_elts.fetch_sub(1, std::memory_order_relaxed);
                 return std::nullopt;
             }
@@ -447,6 +487,7 @@ RevertableObject::commit_delta(const StorageDelta& delta)
     {
         case DeltaType::DELETE_LAST:
         {
+            conditional_ro_yield();
             delete_last_committed.store(true, std::memory_order_relaxed);
             return;
         }
@@ -471,6 +512,7 @@ RevertableObject::commit_delta(const StorageDelta& delta)
         }
         case DeltaType::HASH_SET_CLEAR:
         {
+            conditional_ro_yield();
             hashset_clear_committed.store(true, std::memory_order_relaxed);
             while(true)
             {
@@ -479,6 +521,7 @@ RevertableObject::commit_delta(const StorageDelta& delta)
                 {
                     return;
                 }
+                conditional_ro_yield();
                 if (max_committed_clear_threshold.compare_exchange_strong(
                     cur_threshold, delta.threshold(), std::memory_order_relaxed))
                 {
@@ -490,6 +533,7 @@ RevertableObject::commit_delta(const StorageDelta& delta)
         {
             int64_t const& d = delta.asset_delta();
 
+            conditional_ro_yield();
             if (d < 0)
             {
                 available_asset_upperbound.fetch_add(d, std::memory_order_relaxed);
@@ -514,6 +558,7 @@ RevertableObject::revert_delta(const StorageDelta& delta)
         case DeltaType::NONNEGATIVE_INT64_SET_ADD: {
             int64_t d = delta.set_add_nonnegative_int64().delta;
             if (d < 0) {
+                conditional_ro_yield();
                 total_subtracted.fetch_sub(d, std::memory_order_relaxed);
                 return;
             }
@@ -527,11 +572,13 @@ RevertableObject::revert_delta(const StorageDelta& delta)
             return;
         }
         case DeltaType::HASH_SET_INCREASE_LIMIT: {
+            conditional_ro_yield();
             size_increase.fetch_sub(delta.limit_increase(),
                                     std::memory_order_relaxed);
             return;
         }
         case DeltaType::HASH_SET_INSERT: {
+            conditional_ro_yield();
             num_new_elts.fetch_sub(1, std::memory_order_relaxed);
             new_hashes.erase(delta.hash());
             return;
@@ -544,7 +591,7 @@ RevertableObject::revert_delta(const StorageDelta& delta)
         case DeltaType::ASSET_OBJECT_ADD:
         {
             int64_t const& d = delta.asset_delta();
-
+            conditional_ro_yield();
             if (d < 0)
             {
                 available_asset.fetch_sub(d, std::memory_order_relaxed);
@@ -672,7 +719,6 @@ RevertableObject::clear_mods()
 void
 RevertableObject::commit_round()
 {
-
     auto new_base = base_obj.commit_round_and_reset();
 
     if (new_base) {
