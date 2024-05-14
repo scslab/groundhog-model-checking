@@ -1,0 +1,35 @@
+# libpthreadsimc
+
+Wrapper for the POSIX Threads API. It should have identical behavior, except
+that it tries running the code _with every possible interleaving_.
+
+Basically, need to do green threading. Keep a list of all threads. At each
+iteration, pick one of the threads to run for some period of time. Fork on the
+choice of which thread to run.
+
+Currently, we require the user to insert yield() calls, and we only switch
+threads at those yield calls.
+
+Eventually, we would like to support automatic single-stepping so these
+explicit yield annotations aren't needed. That should be relatively easy to do;
+fork off a manager thread that single-steps the underlying process when
+requested. But for now we can assume we have yields.
+
+#### Architecture
+
+libimc handles basic branching/choice; it knows nothing about the greenthreads.
+this is mostly copied over from the libraft stuff.
+
+libptimc is a greenthreads implementation using libimc to determine thread
+ordering.
+
+#### Usage
+
+Write your code inside a function called
+
+    void imc_check_main(void)
+
+Use imcthread_create and imcthread_yield
+
+#### Random Notes
+- imcthread_create does *not* act as a yield
