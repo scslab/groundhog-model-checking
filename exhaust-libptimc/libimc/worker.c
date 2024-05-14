@@ -156,13 +156,17 @@ static void try_split(struct message message) {
         }
 
         send_progress();
+        int pid = getpid();
         if (fork()) { // parent
             if (fork()) {
                 // let the parent reap me
                 exit(0);
             } else {
                 node->n_children--;
-                tell_master((struct message){MSG_DID_SPLIT}, WORKER_I);
+                tell_master((struct message){
+                    .message_type = MSG_DID_SPLIT,
+                    .pid = pid,
+                }, WORKER_I);
             }
         } else { // child
             WORKER_I = message.new_id;

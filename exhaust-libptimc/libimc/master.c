@@ -142,6 +142,7 @@ void launch_master() {
 
                     case MSG_DID_SPLIT:
                         worker_alive[fill_slot] = 1;
+                        waitpid(reply.pid, NULL, 0);
                         goto finish_split;
 
                     case MSG_NO_SPLIT:
