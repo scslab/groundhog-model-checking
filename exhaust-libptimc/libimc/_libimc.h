@@ -12,6 +12,7 @@ extern int WORKER2MASTER_RD[N_WORKERS];
 extern int WORKER2MASTER_WR[N_WORKERS];
 
 extern void launch_worker(unsigned int i);
+extern void worker_replay(char *path);
 
 enum message_type {
     MSG_NONE,

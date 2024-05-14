@@ -40,6 +40,10 @@ void print_progress(void) {
 }
 
 void launch_master() {
+    // make a bugs directory
+    system("mkdir -p bugs");
+    system("rm bugs/*");
+
     assert(!prctl(PR_SET_CHILD_SUBREAPER, 1, 0, 0, 0));
 
     // set up the control pipes
@@ -149,10 +153,9 @@ finish_split: break;
 }
 
 int main(int argc, char **argv) {
-    extern int sscanf(const char *str, const char *format, ...);
     if (argc > 1) {
-        printf("This version doesn't yet support replay.\n");
-        exit(1);
+        assert(argc == 2);
+        worker_replay(argv[1]);
     } else {
         launch_master();
     }

@@ -9,6 +9,7 @@
 #include <signal.h>
 #include <time.h>
 
+static int IS_REPLAY;
 static size_t WORKER_I;
 static size_t N_BRANCHES, N_BUGS;
 static void send_progress(void) {
@@ -173,17 +174,37 @@ static void try_split(struct message message) {
 static jmp_buf RESET_JMP;
 
 void report_error() {
-    N_BUGS++;
-    printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-    printf("Error found!\n");
-    printf("Unfortunately, we don't yet have error printing...\n");
-    printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+    if (IS_REPLAY) {
+        fprintf(stderr, "Done with replay!\n");
+        siglongjmp(RESET_JMP, 1);
+    }
 
-    // TODO: reset signals
+    N_BUGS++;
+
+    char tmpname[128];
+    strcpy(tmpname, "bugs/XXXXXX");
+    mkstemp(tmpname);
+    FILE *f = fopen(tmpname, "w");
+
+    struct tree_node *node = ROOT;
+    while (node) {
+        fprintf(f, "%lu\n", node->choice);
+        node = node->children + node->pos;
+    }
+
+    fclose(f);
+
+    fprintf(stderr, "Error written to %s\n", tmpname);
+
     check_exit_normal();
 }
 
 void check_exit_normal() {
+    if (IS_REPLAY) {
+        fprintf(stderr, "Replay finished with normal exit.\n");
+        siglongjmp(RESET_JMP, 1);
+    }
+
     N_BRANCHES++;
     if ((N_BRANCHES + 1) % 500 == 0)
         send_progress();
@@ -233,5 +254,28 @@ void launch_worker(unsigned int i) {
     check_main();
 
     // (3) trigger a reset
+    check_exit_normal();
+}
+
+void worker_replay(char *path) {
+    if (sigsetjmp(RESET_JMP, 1)) return;
+    IS_REPLAY = 1;
+
+    FILE *f = fopen(path, "r");
+    assert(f);
+    NODE = ROOT = calloc(1, sizeof(*ROOT));
+    while (1) {
+        size_t choice = 0;
+        if (fscanf(f, " %lu", &choice) != 1) break;
+
+        NODE->n_children = 2;
+        NODE->children = calloc(2, sizeof(NODE->children[0]));
+        NODE->children[0].choice = choice;
+        NODE->children[0].parent = NODE;
+
+        NODE = NODE->children;
+    }
+    NODE = ROOT->children;
+    check_main();
     check_exit_normal();
 }
