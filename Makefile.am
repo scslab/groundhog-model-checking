@@ -21,6 +21,7 @@ SUBDIRS = $(PKGCONFIG_SUBDIRS)
 CLEANFILES = *~ .*~
 
 include $(srcdir)/lib/utility/Makefile.am.fragment
+include $(srcdir)/lib/merkle_trie_toolkit/Makefile.am.fragment
 
 X_FILES = \
 	xdr/storage.x \
@@ -73,6 +74,7 @@ AM_CPPFLAGS = \
 	$(xdrpp_CFLAGS) \
 	$(libsodium_CFLAGS) \
 	$(utility_CFLAGS) \
+	$(mtt_CFLAGS) \
 	-I./exhaust-libptimc/libimc/ \
 	-I./exhaust-libptimc
 
@@ -80,6 +82,7 @@ LDADD = \
 	$(xdrpp_LIBS) \
 	$(libsodium_LIBS) \
 	$(utility_LIBS) \
+	$(mtt_LIBS) \
 	./exhaust-libptimc/build/libptimc.a
 
 $(SRCS:.cc=.o) : $(XH_FILES)
@@ -93,7 +96,8 @@ bin_PROGRAMS = \
 	test_hs_tombstone_bug_shorter \
 	test_rbo_basic_empty \
 	test_rbo_basic_empty_sametc \
-	test_rbo_basic_empty_sametc2
+	test_rbo_basic_empty_sametc2 \
+	test_ephemeraltrie_insert
 
 test_uint128_simple_SOURCES = main/test_uint128_simple.cc $(SRCS)
 test_uint128_buggy_SOURCES = main/test_uint128_buggy.cc $(SRCS)
@@ -104,6 +108,7 @@ test_hs_tombstone_bug_shorter_SOURCES = main/test_hs_tombstone_bug_shorter.cc $(
 test_rbo_basic_empty_SOURCES = main/test_rbo_basic_empty.cc $(SRCS)
 test_rbo_basic_empty_sametc_SOURCES = main/test_rbo_basic_empty_sametc.cc $(SRCS)
 test_rbo_basic_empty_sametc2_SOURCES = main/test_rbo_basic_empty_sametc2.cc $(SRCS)
+test_ephemeraltrie_insert_SOURCES = main/test_ephemeraltrie_insert.cc $(SRCS)
 
 
 clean-local:
