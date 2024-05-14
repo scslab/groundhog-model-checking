@@ -28,7 +28,7 @@
 
 using xdr::operator==;
 
-#include "libptimc/libptimc.h"
+#include "libptimc.h"
 #include "config/yield_config.h"
 
 namespace scs {

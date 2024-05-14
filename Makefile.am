@@ -65,17 +65,22 @@ SRCS = \
 libptimc/build/libptimc.a: libptimc/libptimc.c libptimc/libimc/libimc_linux.c libptimc/libimc/master.c libptimc/libimc/worker.c
 	cd libptimc && make
 
+exhaust-libptimc/build/libptimc.a: exhaust-libptimc/libptimc.c exhaust-libptimc/libimc/libimc_linux.c exhaust-libptimc/libimc/master.c exhaust-libptimc/libimc/worker.c
+	cd exhaust-libptimc && make
+
+
 AM_CPPFLAGS = \
 	$(xdrpp_CFLAGS) \
 	$(libsodium_CFLAGS) \
 	$(utility_CFLAGS) \
-	-I./libptimc/libimc/
+	-I./exhaust-libptimc/libimc/ \
+	-I./exhaust-libptimc
 
 LDADD = \
 	$(xdrpp_LIBS) \
 	$(libsodium_LIBS) \
 	$(utility_LIBS) \
-	./libptimc/build/libptimc.a
+	./exhaust-libptimc/build/libptimc.a
 
 $(SRCS:.cc=.o) : $(XH_FILES)
 

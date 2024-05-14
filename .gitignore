@@ -10,6 +10,10 @@ missing
 stamp-h1
 compile
 autom4te.cache/
+Makefile
+!*/Makefile
+
+bugs/
 
 **/*~
 

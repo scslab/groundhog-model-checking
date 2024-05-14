@@ -1,5 +1,5 @@
 
-#include "libptimc/libptimc.h"
+#include "libptimc.h"
 
 #include <cstdint>
 
@@ -9,7 +9,13 @@
 
 #include "xdr/storage.h"
 
-static scs::AtomicSet set(4);
+#include <memory>
+
+static std::unique_ptr<scs::AtomicSet> set;
+
+static void resetter() {
+    set.reset();
+}
 
 scs::HashSetEntry make_hs_entry(uint64_t nonce) {
     scs::HashSetEntry hs;
@@ -18,13 +24,13 @@ scs::HashSetEntry make_hs_entry(uint64_t nonce) {
 }
 
 void *insert_worker(void *ptr) {
-    *((bool*) ptr) = set.try_insert(make_hs_entry(1));
+    *((bool*) ptr) = set->try_insert(make_hs_entry(1));
     return NULL;
 }
 
 void *insert_other(void* ptr) {
     uint64_t val = (uint64_t) ptr;
-    assert(set.try_insert(make_hs_entry(val)));
+    assert(set->try_insert(make_hs_entry(val)));
   //  assert(set.try_insert(make_hs_entry(val + 1)));
   //  assert(set.try_insert(make_hs_entry(val + 2)));
     return NULL;
@@ -32,6 +38,9 @@ void *insert_other(void* ptr) {
 
 void imc_check_main(void) {
     scs::yield_config.HS_YIELD = true;
+
+    set = std::make_unique<scs::AtomicSet>(4);
+    register_resetter(resetter);
 
     imcthread_t t1, t2, t3;
     bool b1 = false, b2 = false;

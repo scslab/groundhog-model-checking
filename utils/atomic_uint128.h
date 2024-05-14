@@ -19,7 +19,7 @@
 #include <atomic>
 #include <cstdint>
 
-#include "libptimc/libptimc.h"
+#include "libptimc.h"
 
 #include "config/yield_config.h"
 

@@ -25,7 +25,7 @@
 
 #include <utils/non_movable.h>
 
-#include "libptimc/libptimc.h"
+#include "libptimc.h"
 
 #include "config/yield_config.h"
 

@@ -1,5 +1,5 @@
 
-#include "libptimc/libptimc.h"
+#include "libptimc.h"
 
 #include <cstdint>
 
@@ -9,7 +9,13 @@
 
 #include "xdr/storage.h"
 
-static scs::AtomicSet set(4);
+#include <memory>
+
+static std::unique_ptr<scs::AtomicSet> set;
+
+static void resetter() {
+    set.reset();
+}
 
 scs::HashSetEntry make_hs_entry(uint64_t nonce) {
     scs::HashSetEntry hs;
@@ -18,20 +24,23 @@ scs::HashSetEntry make_hs_entry(uint64_t nonce) {
 }
 
 void *insert_worker(void *ptr) {
-    assert(set.try_insert(make_hs_entry(1), 0));
-    assert(!set.try_insert(make_hs_entry(1), 0));
+    assert(set->try_insert(make_hs_entry(1), 0));
+    assert(!set->try_insert(make_hs_entry(1), 0));
     return NULL;
 }
 
 void *insert_erase(void* ptr) {
-    assert(set.try_insert(make_hs_entry(2), 0));
-    set.erase(make_hs_entry(2), 0);
+    assert(set->try_insert(make_hs_entry(2), 0));
+    set->erase(make_hs_entry(2), 0);
     return NULL;
 }
 
 void imc_check_main(void) {
     scs::yield_config.HS_YIELD = true;
     scs::hashset_bug = true;
+
+    set = std::make_unique<scs::AtomicSet>(4);
+    register_resetter(resetter);
 
     imcthread_t t1, t2;
     imcthread_create(&t1, NULL, insert_worker, 0);
