@@ -233,7 +233,7 @@ void launch_worker(unsigned int i) {
     sigemptyset(&(action.sa_mask));
     action.sa_flags = 0;
     assert(!sigaction(SIGABRT, &action, 0));
-    // assert(!sigaction(SIGSEGV, &action, 0));
+    assert(!sigaction(SIGSEGV, &action, 0));
 
     // (1) set a setjmp for resetting the search
     if (sigsetjmp(RESET_JMP, 1)) search_increment();
