@@ -10,7 +10,7 @@
 #include "xdr/storage.h"
 #include "mtt/ephemeral_trie/atomic_ephemeral_trie.h"
 
-using trie_t = trie::AtomicTrie<trie::EmptyValue, trie::UInt64Prefix, trie::EphemeralTrieMetadataBase, 5>;
+using trie_t = trie::AtomicTrie<trie::EmptyValue, trie::UInt64Prefix, trie::EphemeralTrieMetadataBase, 5, 1>;
 
 static std::unique_ptr<trie_t> t;
 
