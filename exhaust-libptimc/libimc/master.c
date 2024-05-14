@@ -57,7 +57,10 @@ void launch_master() {
         WORKER2MASTER_WR[i] = ends[1];
     }
 
+    // 0 -> dead, 1 -> alive, -1 -> waiting on it to die
     int worker_alive[N_WORKERS] = {0};
+    // only guaranteed to be up-to-date for workers with worker_alive[i] == -1
+    int worker_pid[N_WORKERS] = {0};
     size_t dead_count = 0;
 
     // launch an initial worker
@@ -77,12 +80,22 @@ void launch_master() {
         // First: handle any workers that want to die
         for (int i = 0; i < N_WORKERS; i++) {
             if (!worker_alive[i]) continue;
+            if (worker_alive[i] == -1) {
+                if (waitpid(worker_pid[i], NULL, WNOHANG)) {
+                    worker_alive[i] = 0;
+                    clear_pipe(MASTER2WORKER_RD[i]);
+                    clear_pipe(WORKER2MASTER_RD[i]);
+                }
+                continue;
+            }
+
             struct message message = hear_worker(i);
             switch (message.message_type) {
                 case MSG_CAN_I_DIE:
-                    worker_alive[i] = 0;
+                    worker_alive[i] = -1;
+                    worker_pid[i] = message.pid;
+                    verbose("Telling worker %d (%d) they can die\n", i, message.pid);
                     tell_worker((struct message){MSG_OK_DIE, 0}, i);
-                    waitpid(message.pid, NULL, 0);
                     break;
 
                 case MSG_PROGRESS:
@@ -101,7 +114,7 @@ void launch_master() {
         // Second: if we have empty slots, ask a worker to split.
         int n_alive = 0, fill_slot = 0;
         for (int i = 0; i < N_WORKERS; i++) {
-            n_alive += worker_alive[i];
+            n_alive += (worker_alive[i] != 0);
             if (!worker_alive[i]) fill_slot = i;
         }
         if (n_alive == 0) break;
@@ -111,7 +124,9 @@ void launch_master() {
         for (int i = 0; i < N_WORKERS; i++) {
             if (!worker_alive[i]) continue;
             if (which--) continue;
+            if (worker_alive[i] == -1) continue;
 
+            verbose("Requesting a split of %d -> %d\n", i, fill_slot);
             tell_worker((struct message){
                 .message_type = MSG_PLEASE_SPLIT,
                 .new_id = fill_slot
@@ -121,6 +136,7 @@ void launch_master() {
                 struct message reply = hear_worker(i);
                 switch (reply.message_type) {
                     case MSG_CAN_I_DIE:
+                        verbose("Telling worker %d not to die, because we want to split\n");
                         tell_worker((struct message){MSG_NO_DIE}, i);
                         break;
 

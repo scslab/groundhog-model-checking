@@ -6,6 +6,9 @@
 #include <errno.h>
 #include "libimc.h"
 
+// #define verbose(...) printf(__VA_ARGS__)
+#define verbose(...) 
+
 extern int MASTER2WORKER_RD[N_WORKERS];
 extern int MASTER2WORKER_WR[N_WORKERS];
 extern int WORKER2MASTER_RD[N_WORKERS];
@@ -58,6 +61,11 @@ static void hear_pipe(int fd, uint8_t *ptr, size_t n) {
         if (!any && !n_read) return;
         any = 1;
     }
+}
+
+static void clear_pipe(int fd) {
+    uint8_t byte;
+    while (read(fd, &byte, 1) == 1);
 }
 
 static void tell_worker(struct message message, int idx) {

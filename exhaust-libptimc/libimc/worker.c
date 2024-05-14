@@ -106,29 +106,32 @@ static void search_increment(void) {
         struct tree_node *parent = NODE->parent;
         if (!parent) {
             send_progress();
+
             struct message death_msg = (struct message){
                 .message_type = MSG_CAN_I_DIE,
+                .pid = getpid(),
             };
+            verbose("%d (%d) trying to die.\n", WORKER_I, getpid());
             tell_master(death_msg, WORKER_I);
-            // printf("Trying to die...\n");
             while (1) {
                 struct message message = hear_master(WORKER_I);
                 switch (message.message_type) {
                 case MSG_NONE: break;
                 case MSG_PLEASE_SPLIT:
-                    // printf("No, I can't split!\n");
+                    verbose("%d was asked to split\n", WORKER_I);
                     tell_master((struct message){MSG_NO_SPLIT}, WORKER_I);
                     tell_master(death_msg, WORKER_I);
                     break;
                 case MSG_OK_DIE:
-                    // printf("Yay, I can die!\n");
+                    verbose("%d gets to die.\n", WORKER_I);
                     exit(0);
                     break;
                 case MSG_NO_DIE:
-                    // printf("Sad, I can't die :(\n");
+                    verbose("%d can't die yet.\n", WORKER_I);
                     break;
                 default:
-                   printf("'Unknown message type %d\n", message.message_type);
+                   printf("While trying to die, %d got unknown message type %d\n",
+                          WORKER_I, message.message_type);
                    break;
                 }
             }
@@ -217,8 +220,6 @@ static void sighandler(int which) {
 }
 
 void launch_worker(unsigned int i) {
-    printf("Got worker!\n");
-
     WORKER_I = i;
     srand(i + 24);
 
@@ -246,7 +247,7 @@ void launch_worker(unsigned int i) {
         break;
 
     default:
-       printf("Unknown message type %d\n", message.message_type);
+       printf("!!!!!!!!!!!!!!! In the main loop, %d (%d) got unknown message type %d\n", WORKER_I, getpid(), message.message_type);
        break;
     }
 
