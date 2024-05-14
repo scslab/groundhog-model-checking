@@ -73,6 +73,7 @@ exhaust-libptimc/build/libptimc.a: exhaust-libptimc/libptimc.c exhaust-libptimc/
 AM_CPPFLAGS = \
 	$(xdrpp_CFLAGS) \
 	$(libsodium_CFLAGS) \
+	$(tbb_CFLAGS) \
 	$(utility_CFLAGS) \
 	$(mtt_CFLAGS) \
 	-I./exhaust-libptimc/libimc/ \
@@ -81,6 +82,7 @@ AM_CPPFLAGS = \
 LDADD = \
 	$(xdrpp_LIBS) \
 	$(libsodium_LIBS) \
+	$(tbb_LIBS) \
 	$(utility_LIBS) \
 	$(mtt_LIBS) \
 	./exhaust-libptimc/build/libptimc.a
