@@ -2,7 +2,7 @@
 
 CFLAGS += -g
 CFLAGS += -O3
-CFLAGS += -DN_WORKERS=16
+CFLAGS += -DN_WORKERS=32
 
 # CFLAGS += -fsanitize=address
 
