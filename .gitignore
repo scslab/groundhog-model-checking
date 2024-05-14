@@ -1,4 +1,3 @@
-Makefile
 *.in
 config.h
 aclocal.m4
