@@ -1,3 +1,11 @@
+##### Replaying bugs
+
+Bugs will be placed in the bugs/ subdirectory.
+
+To replay a bug, use
+
+    $ ./build/examples/whatever bugs/BugID
+
 ##### Exhaustive-parallel implementation
 
 Basically:
@@ -18,8 +26,6 @@ Basically:
 
     - The child *must* respond to this control message, with either success or
       failure.
-
-#####
 
 # libpthreadsimc
 
