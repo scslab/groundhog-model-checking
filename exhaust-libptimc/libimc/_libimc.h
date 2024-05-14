@@ -20,6 +20,7 @@ enum message_type {
     MSG_CAN_I_DIE,
     MSG_DID_SPLIT,
     MSG_NO_SPLIT,
+    MSG_PROGRESS,
 
     // Master -> Worker
     MSG_PLEASE_SPLIT,
@@ -31,7 +32,9 @@ struct message {
     enum message_type message_type;
     int new_id;
     int pid;
-    size_t count;
+
+    size_t n_branches;
+    size_t n_bugs;
 };
 
 static void tell_pipe(int fd, uint8_t *ptr, size_t n) {

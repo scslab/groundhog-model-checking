@@ -9,7 +9,7 @@ static void resetter(void) {
 
 void *worker(void *_) {
     uint64_t cval = counter;
-    // imcthread_yield();
+    imcthread_yield();
     cval += UINT32_MAX;
     // imcthread_yield();
     counter = cval;

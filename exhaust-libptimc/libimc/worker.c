@@ -10,7 +10,15 @@
 #include <time.h>
 
 static size_t WORKER_I;
-static size_t N_EXPLORED = 0;
+static size_t N_BRANCHES, N_BUGS;
+static void send_progress(void) {
+    tell_master((struct message){
+        .message_type = MSG_PROGRESS,
+        .n_branches = N_BRANCHES,
+        .n_bugs = N_BUGS
+    }, WORKER_I);
+    N_BRANCHES = N_BUGS = 0;
+}
 
 struct resetter {
     void (*fn)(void);
@@ -93,20 +101,12 @@ choice_t choose(choice_t n, hash_t hash) {
 
 static void search_increment(void) {
     // finish off this branch
-    N_EXPLORED++;
-
-    static time_t last_time = 0;
-    if ((time(0) - last_time) > 2) {
-        last_time = time(0);
-        printf("Worker %2d has visited %10d\n", WORKER_I, N_EXPLORED);
-    }
-
     while (1) {
         struct tree_node *parent = NODE->parent;
         if (!parent) {
+            send_progress();
             struct message death_msg = (struct message){
                 .message_type = MSG_CAN_I_DIE,
-                .count = N_EXPLORED,
             };
             tell_master(death_msg, WORKER_I);
             // printf("Trying to die...\n");
@@ -121,7 +121,7 @@ static void search_increment(void) {
                     break;
                 case MSG_OK_DIE:
                     // printf("Yay, I can die!\n");
-                    _exit(0);
+                    exit(0);
                     break;
                 case MSG_NO_DIE:
                     // printf("Sad, I can't die :(\n");
@@ -131,7 +131,7 @@ static void search_increment(void) {
                    break;
                 }
             }
-            exit(0);
+            assert(!"Shouldn't reach here\n");
         }
 
         parent->pos++;
@@ -151,6 +151,7 @@ static void try_split(struct message message) {
             continue;
         }
 
+        send_progress();
         if (fork()) { // parent
             if (fork()) {
                 // let the parent reap me
@@ -163,7 +164,6 @@ static void try_split(struct message message) {
             WORKER_I = message.new_id;
             node->pos = node->n_children - 1;
             assert(node->pos < node->n_children);
-            N_EXPLORED = 0;
         }
         return;
     }
@@ -173,12 +173,20 @@ static void try_split(struct message message) {
 static jmp_buf RESET_JMP;
 
 void report_error() {
-    printf("ERROR found!\n");
-    // might be in a signal handler
-    _exit(1);
+    N_BUGS++;
+    printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+    printf("Error found!\n");
+    printf("Unfortunately, we don't yet have error printing...\n");
+    printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+
+    // TODO: reset signals
+    check_exit_normal();
 }
 
 void check_exit_normal() {
+    N_BRANCHES++;
+    if ((N_BRANCHES + 1) % 500 == 0)
+        send_progress();
     siglongjmp(RESET_JMP, 1);
 }
 
