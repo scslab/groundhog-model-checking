@@ -3,9 +3,16 @@
 
 static uint64_t counter;
 
+static void resetter(void) {
+    counter = 0;
+}
+
 void *worker(void *_) {
-    counter += UINT32_MAX;
-    printf("Finished worker; counter value is %llu\n", counter);
+    uint64_t cval = counter;
+    // imcthread_yield();
+    cval += UINT32_MAX;
+    // imcthread_yield();
+    counter = cval;
     return NULL;
 }
 
@@ -16,7 +23,9 @@ void *sub_worker(void *_) {
 }
 
 void imc_check_main(void) {
-    printf("Starting main; counter value is %llu\n", counter);
+    register_resetter(resetter);
+
+    // printf("Starting main; counter value is %llu\n", counter);
 
     imcthread_t t1, t2, t3;
     imcthread_create(&t1, NULL, worker, 0);
