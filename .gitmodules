@@ -7,3 +7,6 @@
 [submodule "lib/utility"]
 	path = lib/utility
 	url = https://github.com/gramseyer/utility.git
+[submodule "lib/merkle_trie_toolkit"]
+	path = lib/merkle_trie_toolkit
+	url = https://github.com/gramseyer/merkle_trie_toolkit.git
