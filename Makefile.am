@@ -99,7 +99,9 @@ bin_PROGRAMS = \
 	test_rbo_basic_empty \
 	test_rbo_basic_empty_sametc \
 	test_rbo_basic_empty_sametc2 \
-	test_ephemeraltrie_insert
+	test_ephemeraltrie_insert \
+	test_ephemeraltrie_insert2
+
 
 test_uint128_simple_SOURCES = main/test_uint128_simple.cc $(SRCS)
 test_uint128_buggy_SOURCES = main/test_uint128_buggy.cc $(SRCS)
@@ -111,8 +113,10 @@ test_rbo_basic_empty_SOURCES = main/test_rbo_basic_empty.cc $(SRCS)
 test_rbo_basic_empty_sametc_SOURCES = main/test_rbo_basic_empty_sametc.cc $(SRCS)
 test_rbo_basic_empty_sametc2_SOURCES = main/test_rbo_basic_empty_sametc2.cc $(SRCS)
 test_ephemeraltrie_insert_SOURCES = main/test_ephemeraltrie_insert.cc $(SRCS)
+test_ephemeraltrie_insert2_SOURCES = main/test_ephemeraltrie_insert2.cc $(SRCS)
 
 
 clean-local:
 	$(RM) -r libptimc/build/
+	$(RM) -r exhaust-libptimc/build/
 
