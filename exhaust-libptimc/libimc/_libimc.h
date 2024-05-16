@@ -44,7 +44,8 @@ struct message {
 static void tell_pipe(int fd, uint8_t *ptr, size_t n) {
     while (n) {
         ssize_t n_sent = write(fd, ptr, n);
-        if (n_sent == EAGAIN || n_sent == EWOULDBLOCK) n_sent = 0;
+        if (n_sent == -1 && (errno == EAGAIN || errno == EWOULDBLOCK))
+            n_sent = 0;
         ptr += n_sent;
         n -= n_sent;
     }
